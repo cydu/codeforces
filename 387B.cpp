@@ -25,15 +25,14 @@ int main(int argc, char* argv[]) {
     }
     sort(need.begin(), need.end());
     sort(curr.begin(), curr.end());
-    int ans = 0;
+    int ans = n;
     for (int i = 0, p = 0; i < need.size(); ++i) {
         while (p < curr.size() && curr[p] < need[i]) {
             ++p; 
         }
         if (p < curr.size() && curr[p] >= need[i]) {
-            continue;
+            --ans;
         }
-        ++ans;
     } 
     cout << ans << endl;
     return 0;
