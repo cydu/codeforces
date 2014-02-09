@@ -8,48 +8,56 @@
 #include <algorithm>
 #include <stdio.h>
 #include <math.h>
+#include <string.h>
 typedef long long lld;
 
 using namespace std;
 
-vector<int> prime_list(int n) {
-    vector<int> primes;
-    vector<char> table(n, 1);
-    for (int i = 2; i < n; ++i) {
-        if (table[i]) {
-            primes.push_back(i);
-            for (int j = i + i; j < n; j += i) {
-                table[j] = 0;
+const static int MAXN = 10000001;
+bool prime_table[MAXN];
+int vec[MAXN];
+int sum[MAXN];
+int mMax;
+
+int main(int argc, char* argv[]) {
+    ios::sync_with_stdio(false);
+
+    int n, m, l, r, x;
+    cin >> n;
+    mMax = 0;
+    for (int i = 0; i < n; ++i) {
+        cin >> x;
+        ++vec[x];
+        mMax = max(mMax, x);
+    }
+    ++mMax;
+
+    memset(prime_table, true, mMax);
+    for (int i = 2; i < mMax; ++i) {
+        if (prime_table[i]) {
+            sum[i] += vec[i];
+            for (int j = i + i; j < mMax; j += i) {
+                prime_table[j] = false;   
+                sum[i] += vec[j];
             }
         }
     }
-    return primes;
-}
-
-int main(int argc, char* argv[]) {
-    int n, m, l, r, mMax;
-    cin >> n;
-    vector<int> vec(n);
-    mMax = 0;
-    map<int, int> bag;
-    for (int i = 0; i < n; ++i) {
-        cin >> vec[i];
-        ++bag[ vec[i] ];
-        mMax = max(mMax, vec[i]);
+    
+    vector<int> primes;
+    vector<int> primes_nums;
+    for (int i = 0; i < mMax; ++i) {
+        if (sum[i] > 0) {
+            primes.push_back(i);
+            primes_nums.push_back(sum[i]);
+            //cout << "prime: " << i << " " << sum[i] << endl;
+        }
     }
-    vector<int> primes = prime_list(mMax + 3);
-    vector<int> primes_nums(primes.size());
-    for (int i = 0; i < primes.size(); ++i) {
-        for (int j = primes[i]; j <= mMax; j += primes[i]) {
-            if (bag.count(j)) {
-                primes_nums[i] += bag[j]; 
-            }
-        }   
+    
+    vector<int> primes_sums(primes_nums.size() + 1);
+    for (int i = 0; i < primes_nums.size(); ++i) {
+        primes_sums[i + 1] = primes_sums[i] + primes_nums[i];
     }
-    vector<int> pre_sum(primes.size() + 1);
-    for (int i = 0; i < primes.size(); ++i) {
-        pre_sum[i + 1] = pre_sum[i] + primes_nums[i];
-    }
+    
     cin >> m;
     for (int i = 0; i < m; ++i) {
         cin >> l >> r;
@@ -57,7 +65,8 @@ int main(int argc, char* argv[]) {
         vector<int>::iterator rit = upper_bound(primes.begin(), primes.end(), r);
         int lindex = distance(primes.begin(), lit);
         int rindex = distance(primes.begin(), rit);
-        cout << pre_sum[rindex] - pre_sum[lindex] << endl;
+        //cout << "query: " << lindex << " " << rindex << endl;
+        cout << primes_sums[rindex] - primes_sums[lindex] << endl;
     }
     return 0;
 }
