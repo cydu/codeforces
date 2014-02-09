@@ -15,23 +15,26 @@ using namespace std;
 int main(int argc, char* argv[]) {
     int n, m, x;
     cin >> n >> m;
-    vector<int> vec(n);
+    vector<int> need(n);
     for (int i = 0; i < n; ++i) {
-        cin >> vec[i];
+        cin >> need[i];
     }
-    map<int, int> bag;
+    vector<int> curr(m);
     for (int i = 0; i < m; ++i) {
-        cin >> x;
-        ++bag[x];
+        cin >> curr[i];
     }
+    sort(need.begin(), need.end());
+    sort(curr.begin(), curr.end());
     int ans = 0;
-    for (int i = 0; i < n; ++i) {
-        if (bag[vec[i]] > 0) {
-            --bag[vec[i]]; 
-        } else {
-            ++ans;
+    for (int i = 0, p = 0; i < need.size(); ++i) {
+        while (p < curr.size() && curr[p] < need[i]) {
+            ++p; 
         }
-    }
+        if (p < curr.size() && curr[p] >= need[i]) {
+            continue;
+        }
+        ++ans;
+    } 
     cout << ans << endl;
     return 0;
 }
