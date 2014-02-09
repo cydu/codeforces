@@ -58,8 +58,8 @@ int main(int argc, char* argv[]) {
     cin >> m;
     for (int i = 0; i < m; ++i) {
         cin >> l >> r;
-        auto lit = primes_nums.lower_bound(l);
-        auto rit = primes_nums.upper_bound(r);
+        map<int, int>::iterator lit = primes_nums.lower_bound(l);
+        map<int, int>::iterator rit = primes_nums.upper_bound(r);
         int sum = 0;
         for (; lit != rit; ++lit) {
             sum += lit->second;
