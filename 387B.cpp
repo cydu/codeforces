@@ -32,8 +32,9 @@ int main(int argc, char* argv[]) {
         }
         if (p < curr.size() && curr[p] >= need[i]) {
             --ans;
+            ++p;
         }
-    } 
+    }
     cout << ans << endl;
     return 0;
 }
