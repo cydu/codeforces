@@ -27,14 +27,14 @@ vector<int> prime_list(int n) {
 }
 
 void prime_solve(vector<int> vec, const vector<int> &primes, 
-        map<int, int> &primes_nums) {
+        vector<int> &primes_nums) {
     int pn = primes.size();
     for (int i = 0; i < vec.size(); ++i) {
         for (int j = 0; j < pn && primes[j] <= vec[i]; ++j) {
             int num  = 1;
             while (vec[i] % primes[j] == 0) {
                 vec[i] /= primes[j];
-                primes_nums[primes[j]] += num;
+                primes_nums[j] += num;
                 num = 0;
                 //cout << primes[j] << " ";
             } 
@@ -42,6 +42,48 @@ void prime_solve(vector<int> vec, const vector<int> &primes,
         //cout << endl;
     }
 }
+
+class SegmentTree {
+public:
+    explicit SegmentTree(int n) {
+        _m = get_m(n);
+        _vec.clear();
+        _vec.resize(_m * 2 + 4);
+    }
+
+    void add(int key, int value) {
+        if (value == 0) {
+            return;
+        }
+        for (key += _m; key > 0; key >>= 1) {
+            _vec[key] += value;
+        }
+    }
+
+    int query(int l, int r) {
+        int ans = 0;
+        for (l += _m - 1, r += _m; l >> 1 != r >> 1; l >>= 1, r >>= 1) {
+            if (l % 2 == 0) {
+                ans += _vec[l + 1];
+            }
+            if (r % 2 == 1) {
+                ans += _vec[r - 1];
+            }
+        }
+        return ans;
+    }
+
+private:
+    int get_m(int n) {
+        int m = 8;
+        while (m < n) {
+            m *= 2;
+        }
+        return --m;
+    }
+    vector<int> _vec;
+    int _m;
+};
 
 int main(int argc, char* argv[]) {
     int n, m, l, r, mMax;
@@ -53,18 +95,18 @@ int main(int argc, char* argv[]) {
         mMax = max(mMax, vec[i]);
     }
     vector<int> primes = prime_list(mMax + 3);
-    map<int, int> primes_nums;
+    vector<int> primes_nums(primes.size());
     prime_solve(vec, primes, primes_nums);
+    SegmentTree tree(primes.size() + 2);
+    for (int i = 0; i < primes.size(); ++i) {
+        tree.add(i + 1, primes_nums[i]);
+    }
     cin >> m;
     for (int i = 0; i < m; ++i) {
         cin >> l >> r;
-        map<int, int>::iterator lit = primes_nums.lower_bound(l);
-        map<int, int>::iterator rit = primes_nums.upper_bound(r);
-        int sum = 0;
-        for (; lit != rit; ++lit) {
-            sum += lit->second;
-            //cout << lit->first << " " << lit->second << endl;
-        }
+        vector<int>::iterator lit = lower_bound(primes.begin(), primes.end(), l);
+        vector<int>::iterator rit = upper_bound(primes.begin(), primes.end(), r);
+        int sum = tree.query(distance(primes.begin(), lit) + 1, distance(primes.begin(), rit) + 1);
         cout << sum << endl;
     }
     return 0;
